@@ -5,8 +5,7 @@
   "main": "api/index.js",
   "scripts": {
     "start": "node api/index.js",
-    "dev": "nodemon api/index.js",
-    "vercel-build": "npm run build"
+    "dev": "nodemon api/index.js"
   },
   "repository": {
     "type": "git",
