@@ -15,6 +15,13 @@ app.use(express.json());
 app.use(cors());
 
 app.use((req, res, next) => {
+    console.log("🛰️  Incoming Request:");
+    console.log("Headers:", req.headers);
+    console.log("Body:", req.body);
+    next();
+});
+
+app.use((req, res, next) => {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Basic ')) {
@@ -31,6 +38,7 @@ app.use((req, res, next) => {
         res.status(403).json({ error: 'Invalid credentials' });
     }
 });
+
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
