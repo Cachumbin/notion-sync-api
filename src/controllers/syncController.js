@@ -21,19 +21,24 @@ const getReminders = async (req, res) => {
 
 const syncNotion = async (req, res) => {
     try {
-        const rawData = req.body;
+        const rawData = req.body.data || req.body;
 
         if (!rawData) {
             return res.status(400).json({ error: 'No event data received' });
         }
 
         const events = rawData.split("END:VEVENT").filter(e => e.trim() !== '');
+
         const parsedReminders = events.map(event => {
             const summaryMatch = event.match(/SUMMARY:(.*)/);
             const dueDateMatch = event.match(/DUEDATE:(.*)/);
             const completedMatch = event.match(/COMPLETED:(.*)/);
 
-            const name = summaryMatch ? summaryMatch[1].trim() : '';
+            if (!summaryMatch) return null;
+
+            const name = summaryMatch[1].trim();
+            if (!name) return null;
+
             const done = completedMatch ? completedMatch[1].trim().toLowerCase() === 'yes' : false;
             const dueDate = dueDateMatch ? moment(dueDateMatch[1].trim(), "DD/MM/YYYY [at] hh:mm A").toISOString() : null;
             const reminderId = name.toLowerCase().replace(/ /g, '-');
@@ -44,11 +49,11 @@ const syncNotion = async (req, res) => {
                 dueDate,
                 reminderId
             };
-        });
+        }).filter(event => event !== null);
 
         const notionTasks = await fetchAllPages();
         const notionMap = new Map(notionTasks.map(task => [
-            task.properties.Name?.title?.[0]?.text?.content.toLowerCase() || '',
+            task.properties.Name?.title?.[0]?.text?.content.toLowerCase(),
             task
         ]));
 
